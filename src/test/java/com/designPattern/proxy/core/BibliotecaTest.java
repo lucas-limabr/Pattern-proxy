@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
 class BibliotecaTest {
@@ -16,12 +17,16 @@ class BibliotecaTest {
     Biblioteca biblioteca;
     LivroRepository livroRepository;
     ILivro livroProxy;
+    Usuario usuarioComum;
+    Usuario usuarioAssinante;
 
     @BeforeEach
     void setUp() {
         livroRepository = Mockito.spy(LivroRepository.class);
         livroProxy = new LivroProxy(livroRepository);
         biblioteca = new Biblioteca("Juiz de Fora", livroProxy);
+        usuarioComum = new Usuario("Lucas", false);
+        usuarioAssinante = new Usuario("Laura", true);
     }
 
     @Test
@@ -61,17 +66,17 @@ class BibliotecaTest {
 
     @Test
     void carregarLivroSemCache() {
-        biblioteca.carregarLivro(1L);
-        Mockito.verify(livroRepository, Mockito.times(1)).carregarLivro(anyLong());
+        biblioteca.carregarLivro(1L, usuarioAssinante);
+        Mockito.verify(livroRepository, Mockito.times(1)).carregarLivro(anyLong(), any(Usuario.class));
     }
 
     @Test
     void carregarLivroUtilizandoCache() {
-        biblioteca.carregarLivro(1L);
+        biblioteca.carregarLivro(1L, usuarioAssinante);
 
-        biblioteca.carregarLivro(1L);
-        biblioteca.carregarLivro(1L);
-        Mockito.verify(livroRepository, Mockito.times(1)).carregarLivro(anyLong());
+        biblioteca.carregarLivro(1L, usuarioAssinante);
+        biblioteca.carregarLivro(1L, usuarioAssinante);
+        Mockito.verify(livroRepository, Mockito.times(1)).carregarLivro(anyLong(), any(Usuario.class));
     }
 
     @Test
@@ -80,7 +85,13 @@ class BibliotecaTest {
     }
 
     @Test
-    void deveRetornarPDFDeUmLivro() {
-        assertEquals("Livro{pdfLivro='Harry Potter e a Pedra Filosofal.pdf'}", biblioteca.carregarLivro(1L));
+    void deveRetornarPDFDeUmLivroParaUsuarioAssinante() {
+        assertEquals("Livro{pdfLivro='Harry Potter e a Pedra Filosofal.pdf'}", biblioteca.carregarLivro(1L, usuarioAssinante));
+    }
+
+    @Test
+    void naoDeveRetornarPDFDeUmLivroParaUsuarioComum() {
+        RuntimeException e = assertThrows(RuntimeException.class, () -> biblioteca.carregarLivro(1L, usuarioComum));
+        assertEquals("Usuário não autorizado a acessar o conteúdo do livro.", e.getMessage());
     }
 }

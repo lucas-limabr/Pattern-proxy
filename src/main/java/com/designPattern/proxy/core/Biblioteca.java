@@ -20,7 +20,7 @@ public class Biblioteca {
         return livro.resumoLivro(id);
     }
 
-    public String carregarLivro(Long id) {
-        return livro.carregarLivro(id);
+    public String carregarLivro(Long id, Usuario usuario) {
+        return livro.carregarLivro(id, usuario);
     }
 }

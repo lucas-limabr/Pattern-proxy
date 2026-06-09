@@ -20,9 +20,7 @@ public class LivroRepository implements ILivro {
     }
 
     @Override
-    public String carregarLivro(Long id) {
+    public String carregarLivro(Long id, Usuario usuario) {
         return bdLivros.carregarLivro(id);
     }
-
-
 }

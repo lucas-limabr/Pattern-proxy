@@ -9,7 +9,7 @@ public class LivroProxy implements ILivro {
     private List<Livro> listaLivros = new ArrayList<>();
     private String resumoLivro;
     private String pdfLivro;
-    private LivroRepository livroRepository;
+    private final LivroRepository livroRepository;
 
     public LivroProxy(LivroRepository livroRepository) {
         this.livroRepository = livroRepository;
@@ -33,10 +33,15 @@ public class LivroProxy implements ILivro {
     }
 
     @Override
-    public String carregarLivro(Long id) {
-        if (this.pdfLivro == null) {
-            this.pdfLivro = this.livroRepository.carregarLivro(id);
+    public String carregarLivro(Long id, Usuario usuario) {
+        if (usuario == null || !usuario.isAssinante()) {
+            throw new RuntimeException("Usuário não autorizado a acessar o conteúdo do livro.");
         }
+
+        if (this.pdfLivro == null) {
+            this.pdfLivro = this.livroRepository.carregarLivro(id, usuario);
+        }
+
         return pdfLivro;
     }
 }
